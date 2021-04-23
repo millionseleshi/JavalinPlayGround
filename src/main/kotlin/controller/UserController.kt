@@ -1,51 +1,59 @@
+/*
+ * @Author Million Seleshi
+ *  2021.
+ */
+
 package controller
 
 
+import arrow.core.Either
 import domain.User
+import domain.UserDTO
 import io.javalin.http.Context
 import org.eclipse.jetty.http.HttpStatus
-import org.valiktor.functions.isEmail
-import org.valiktor.functions.isNotBlank
-import org.valiktor.validate
 import service.UserService
-import util.PasswordValid.isPasswordValid
+import util.InputValidation.Factory.validateRegisterInput
+import util.InputValidation.Factory.validateUpdateInput
 
 class UserController(private val userService: UserService) {
 
-    fun register(ctx: Context): User {
-        return ctx.body<User>().apply {
-            validate(this) {
-                validate(User::email).isEmail()
-                validate(User::password).isPasswordValid()
-            }
-        }.also { userService.create(it) }
-            .apply {
-                ctx.json(this).status(HttpStatus.CREATED_201)
-            }
-    }
 
-    fun getCurrentUser(ctx: Context): User {
-        val userEmail = ctx.attribute<String>("email")!!
-        return userService.getByEmail(userEmail)
-            .apply { ctx.json(this).status(HttpStatus.OK_200) }
-    }
-
-    fun updateUser(ctx: Context): User {
-        val userEmail = ctx.attribute<String>("email")!!
-        return ctx.body<User>()
-            .apply {
-                validate(this)
-                {
-                    validate(User::email).isEmail().isNotBlank()
-                    validate(User::username).isNotBlank()
-                    validate(User::password).isPasswordValid()
-                    validate(User::token).isNotBlank()
+    fun register(ctx: Context) {
+        when (val result = validateRegisterInput(ctx.body<UserDTO>())) {
+            is Either.Right -> {
+                result.value.user.takeIf { it != null }?.also {
+                    userService.create(it)
+                }?.apply {
+                    ctx.json(userService.getByEmail(this.email)).status(HttpStatus.CREATED_201)
                 }
-            }.apply {
-                userService.update(userEmail, this)
-            }.also {
-                ctx.json(it).status(HttpStatus.OK_200)
             }
+            is Either.Left -> {
+                ctx.json(result.value.errors).status(HttpStatus.BAD_REQUEST_400)
+            }
+        }
+    }
+
+
+    fun getCurrentUser(ctx: Context) {
+        val userEmail = ctx.pathParam<String>("email").get()
+        val user = userService.getByEmail(userEmail)
+        ctx.json(user).status(HttpStatus.OK_200)
+    }
+
+    fun updateUser(ctx: Context) {
+        val userEmail = ctx.attribute<String>(key = "email")
+        when (val result = validateUpdateInput(ctx.body<User>())) {
+            is Either.Right -> {
+                result.value.also {
+                    userService.update(userEmail.toString(), it)!!.apply {
+                        ctx.json(this).status(HttpStatus.OK_200)
+                    }
+                }
+            }
+            is Either.Left -> {
+                ctx.json(result.value.errors).status(HttpStatus.BAD_REQUEST_400)
+            }
+        }
     }
 
     fun deleteUser(ctx: Context) {

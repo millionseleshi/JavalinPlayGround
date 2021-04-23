@@ -1,3 +1,8 @@
+/*
+ * @Author Million Seleshi
+ *  2021.
+ */
+
 package util
 
 import domain.User
@@ -11,7 +16,7 @@ object PasswordValid : Constraint {
         isValidPassword(it)
     }
 
-    fun isValidPassword(data: String?): Boolean {
+    private fun isValidPassword(data: String?): Boolean {
         val str = data.toString()
         var valid = true
 

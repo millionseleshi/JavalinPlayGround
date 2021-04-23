@@ -1,3 +1,8 @@
+/*
+ * @Author Million Seleshi
+ *  2021.
+ */
+
 package config
 
 import com.zaxxer.hikari.HikariConfig

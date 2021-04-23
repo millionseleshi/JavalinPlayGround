@@ -1,3 +1,8 @@
+/*
+ * @Author Million Seleshi
+ *  2021.
+ */
+
 package repository
 
 import domain.User
@@ -8,7 +13,7 @@ import javax.sql.DataSource
 
 internal object Users : LongIdTable() {
     val email: Column<String> = varchar("email", 200).uniqueIndex()
-    val username: Column<String> = varchar("username", 100).uniqueIndex()
+    val username: Column<String> = varchar("username", 100)
     val password: Column<String> = varchar("password", 150)
     val token: Column<String> = varchar("token", 200)
 
@@ -78,7 +83,7 @@ class UserRepository(private val dataSource: DataSource) {
                 }
             }
         }
-        return findByEmail(email)
+        return findByEmail(user.email)
     }
 
     fun delete(email: String) {

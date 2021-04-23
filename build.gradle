@@ -1,5 +1,11 @@
+/*
+ * @Author Million Seleshi
+ *  2021.
+ */
+
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.4.31'
+    id "com.coditory.integration-test" version "1.2.0"
 }
 
 group 'org.geostar'
@@ -9,7 +15,6 @@ repositories {
     jcenter()
     mavenCentral()
 }
-
 
 
 ext {
@@ -24,6 +29,7 @@ ext {
     mockk_version = "1.11.0"
     mickito_kotlin_version = "2.2.11"
     kotest_version = "4.4.3"
+    arrow_version = "0.13.1"
 }
 
 dependencies {
@@ -41,11 +47,13 @@ dependencies {
     implementation "com.h2database:h2:$h2_version"
     implementation "org.slf4j:slf4j-simple:$slf4j_version"
     implementation "org.valiktor:valiktor-core:$valiktor_version"
+    implementation "io.arrow-kt:arrow-core:$arrow_version"
     testImplementation "io.mockk:mockk:$mockk_version"
+    implementation "com.squareup.okhttp3:okhttp:4.9.1"
     testImplementation "io.kotest:kotest-runner-junit5:$kotest_version"
     testImplementation "io.kotest:kotest-assertions-core:$kotest_version"
+    testImplementation "io.kotest:kotest-assertions-json:$kotest_version"
     testImplementation "io.kotest:kotest-property:$kotest_version"
-    testImplementation "io.kotest:kotest-assertions-json-jvm:$kotest_version"
     testImplementation "org.valiktor:valiktor-test:$valiktor_version"
 }
 
@@ -55,9 +63,14 @@ compileKotlin {
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
-
+compileIntegrationKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
 
 test {
     useJUnitPlatform()
 }
 
+tasks.withType(Test) {
+    useJUnitPlatform()
+}

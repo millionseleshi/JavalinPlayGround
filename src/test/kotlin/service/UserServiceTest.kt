@@ -1,3 +1,8 @@
+/*
+ * @Author Million Seleshi
+ *  2021.
+ */
+
 package service
 
 import domain.User
@@ -33,7 +38,7 @@ class UserServiceTest : FunSpec({
             userService.create(user)
         }
         exception.status.shouldBe(HttpStatus.BAD_REQUEST_400)
-        exception.message.shouldBe("Account exist")
+        exception.message.shouldBe("Account Exist")
         verify { userRepository.findByEmail(any<String>()) }
         confirmVerified(userRepository)
     }
@@ -73,7 +78,7 @@ class UserServiceTest : FunSpec({
         val exception = shouldThrow<NotFoundResponse> {
             userService.update(user.email, user)
         }
-        exception.message.shouldBe("user not updated")
+        exception.message.shouldBe("user not found")
 
         verify { userRepository.update(user.email, user) }
 

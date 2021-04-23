@@ -1,3 +1,8 @@
+/*
+ * @Author Million Seleshi
+ *  2021.
+ */
+
 package config
 
 import controller.UserController
@@ -21,5 +26,5 @@ object ModuleConfig {
         single { UserRepository(get()) }
     }
 
-    internal val allModule = listOf(configModule, userModule)
+     val allModule = listOf(configModule, userModule)
 }

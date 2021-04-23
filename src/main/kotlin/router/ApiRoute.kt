@@ -1,3 +1,8 @@
+/*
+ * @Author Million Seleshi
+ *  2021.
+ */
+
 package router
 
 
@@ -16,10 +21,11 @@ class ApiRoute(
             {
                 post(userController::register)
                 put(userController::updateUser)
-                post(userController::getCurrentUser)
                 path(":email") {
+                    get(userController::getCurrentUser)
                     delete(userController::deleteUser)
                 }
+
             }
         }
     }
