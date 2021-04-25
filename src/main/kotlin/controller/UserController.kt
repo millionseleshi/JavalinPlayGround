@@ -7,7 +7,6 @@ package controller
 
 
 import arrow.core.Either
-import domain.User
 import domain.UserDTO
 import io.javalin.http.Context
 import org.eclipse.jetty.http.HttpStatus
@@ -41,11 +40,11 @@ class UserController(private val userService: UserService) {
     }
 
     fun updateUser(ctx: Context) {
-        val userEmail = ctx.attribute<String>(key = "email")
-        when (val result = validateUpdateInput(ctx.body<User>())) {
+        val userEmail = ctx.body<UserDTO>().user?.email
+        when (val result = validateUpdateInput(ctx.body<UserDTO>())) {
             is Either.Right -> {
-                result.value.also {
-                    userService.update(userEmail.toString(), it)!!.apply {
+                result.value.user?.also {
+                    userService.update(userEmail, it)?.apply {
                         ctx.json(this).status(HttpStatus.OK_200)
                     }
                 }

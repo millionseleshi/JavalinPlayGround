@@ -9,6 +9,7 @@ import arrow.core.Either
 import domain.User
 import domain.UserDTO
 import exception.ValidationError
+import io.javalin.http.BadRequestResponse
 import org.valiktor.ConstraintViolationException
 import org.valiktor.functions.isEmail
 import org.valiktor.functions.isNotBlank
@@ -36,13 +37,16 @@ class InputValidation {
                 )
             }
 
-        fun validateUpdateInput(input: User): Either<ValidationError, User> =
+        fun validateUpdateInput(input: UserDTO): Either<ValidationError, UserDTO> =
             try {
                 Either.Right(validate(input) {
-                    validate(User::email).isEmail()
-                    input.username ?: validate(User::username).isNotBlank()
-                    input.token ?: validate(User::token).isNotBlank()
-                    input.password ?: validate(User::password).isNotBlank()
+                    validate(input.user ?: throw BadRequestResponse("user can't be empty")) {
+                        validate(User::email).isEmail()
+                        input.user.username ?: validate(User::username).isNotBlank()
+                        input.user.token ?: validate(User::token).isNotBlank()
+                        input.user.password ?: validate(User::password).isNotBlank()
+                    }
+
                 })
             } catch (ex: ConstraintViolationException) {
                 Either.Left(

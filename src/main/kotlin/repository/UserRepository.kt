@@ -50,10 +50,10 @@ class UserRepository(private val dataSource: DataSource) {
         return transaction(Database.connect(dataSource))
         {
             Users.insertAndGetId { row ->
-                row[Users.email] = user.email
-                row[Users.username] = user.username!!
-                row[Users.token] = user.token!!
-                row[Users.password] = user.password!!
+                row[email] = user.email
+                row[username] = user.username.toString()
+                row[token] = user.token.toString()
+                row[password] = user.password.toString()
             }
         }.value
     }
@@ -72,14 +72,14 @@ class UserRepository(private val dataSource: DataSource) {
         {
             Users.update({ Users.email eq email }) { row ->
                 row[Users.email] = user.email
-                if (user.token != null) {
-                    row[Users.token] = user.token
-                }
                 if (user.username != null) {
-                    row[Users.username] = user.username
+                    row[username] = user.username
+                }
+                if (user.token != null) {
+                    row[token] = user.token
                 }
                 if (user.password != null) {
-                    row[Users.password] = user.password
+                    row[password] = user.password
                 }
             }
         }

@@ -66,7 +66,7 @@ class UserControllerIntegrationTest : FunSpec({
 
         client.newCall(requestPostUserOne).execute()
             .use { response ->
-                response.body?.string() shouldContainIgnoringCase("Account Exist")
+                response.body?.string() shouldContainIgnoringCase ("Account Exist")
                 response.code shouldBe HttpStatus.BAD_REQUEST_400
             }
     }
@@ -95,10 +95,11 @@ class UserControllerIntegrationTest : FunSpec({
     {
         createUser(baseURL, userEmail, userName, token, password, mediaType, client)
 
-        val requestPutUser = requestPut(baseURL, userEmail, mediaType)
+        val requestPutUser = requestPut(baseURL, userEmail, "newUsername", mediaType)
         client.newCall(requestPutUser).execute().use { response ->
             val user = mapper.readValue(response.body!!.string(), User::class.java)
             user.email shouldBe userEmail
+            user.username shouldNotBe userName
             response.code shouldBe HttpStatus.OK_200
             response.header("Content-Type") shouldBe "application/json"
         }
@@ -108,9 +109,9 @@ class UserControllerIntegrationTest : FunSpec({
     {
         createUser(baseURL, userEmail, userName, token, password, mediaType, client)
 
-        val requestPutUser = requestPut(baseURL, "user@email.com", mediaType)
+        val requestPutUser = requestPut(baseURL, "user@email.com", userName, mediaType)
         client.newCall(requestPutUser).execute().use { response ->
-             response.body!!.string() shouldContainIgnoringCase("Resource can't be found to fulfill the request")
+            response.body!!.string() shouldContainIgnoringCase ("Resource can't be found to fulfill the request")
             response.code shouldBe HttpStatus.NOT_FOUND_404
             response.header("Content-Type") shouldBe "application/json"
         }
@@ -120,7 +121,7 @@ class UserControllerIntegrationTest : FunSpec({
     {
         createUser(baseURL, userEmail, userName, token, password, mediaType, client)
 
-        val requestPutUser = requestPut(baseURL, "user", mediaType)
+        val requestPutUser = requestPut(baseURL, "user", userName, mediaType)
         client.newCall(requestPutUser).execute().use { response ->
             response.code shouldBe HttpStatus.BAD_REQUEST_400
             response.header("Content-Type") shouldBe "application/json"
@@ -147,7 +148,7 @@ class UserControllerIntegrationTest : FunSpec({
         val requestGetUser = requestGet(baseURL, "userEmail@email.com")
 
         client.newCall(requestGetUser).execute().use { response ->
-            response.body!!.string() shouldContainIgnoringCase("Resource can't be found to fulfill the request")
+            response.body!!.string() shouldContainIgnoringCase ("Resource can't be found to fulfill the request")
             response.code shouldBe HttpStatus.NOT_FOUND_404
             response.header("content-type") shouldBe "application/json"
         }
@@ -198,24 +199,16 @@ private fun requestFirstPost(
         .build()
 }
 
-private fun requestFirstPostEmpty(
-    baseURL: String,
-    MEDIA_TYPE: MediaType
-): Request {
-    val postBody = """ { "user": "{}" } """
-    return Request.Builder()
-        .url("$baseURL/user")
-        .post(postBody.toRequestBody(MEDIA_TYPE))
-        .build()
-}
-
 
 private fun requestPut(
     baseURL: String,
     userEmail: String,
+    userName: String,
     MEDIA_TYPE: MediaType
 ): Request {
-    val putBody = """{ "email" : "$userEmail"}"""
+    val putBody = """
+      {"user":{ "email" : "$userEmail","username" : "$userName"}}
+  """
     return Request.Builder()
         .url("$baseURL/user")
         .put(putBody.toRequestBody(MEDIA_TYPE))
